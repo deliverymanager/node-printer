@@ -27,8 +27,7 @@
     "node": ">= 0.8.0"
   },
   "scripts": {
-    "build": "node-gyp build",
-    "preinstall": "npm install node-gyp node-pre-gyp",
+    "preinstall": "node-gyp configure",
     "install": "node-gyp build",
     "npg": "node-gyp build",
     "npg-clean": "node-pre-gyp clean",
