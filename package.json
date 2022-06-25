@@ -27,6 +27,7 @@
     "node": ">= 0.8.0"
   },
   "scripts": {
+    "manually_build_node16": "echo 'open powershell in admin mode and press nvm use 16.15.1 && npm rebuild -g'",
     "update_modules": "ncu -u && npm i --leagcy-peer-deps",
     "preinstall": "node-gyp configure",
     "install": "node-gyp build",
