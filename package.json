@@ -16,9 +16,9 @@
     "url": "https://github.com/tojocky/node-printer.git"
   },
   "devDependencies": {
-    "grunt": "^1.4.1",
+    "grunt": "^1.5.3",
     "grunt-contrib-copy": "^1.0.0",
-    "grunt-contrib-jshint": "^3.0.0",
+    "grunt-contrib-jshint": "^3.2.0",
     "grunt-node-gyp": "git://github.com/tojocky/grunt-node-gyp.git",
     "grunt-nw-gyp": "git://github.com/tojocky/grunt-nw-gyp.git",
     "nodeunit": "*"
@@ -27,6 +27,7 @@
     "node": ">= 0.8.0"
   },
   "scripts": {
+    "update_modules": "ncu -u && npm i --leagcy-peer-deps",
     "preinstall": "node-gyp configure",
     "install": "node-gyp build",
     "npg": "node-gyp build",
@@ -47,8 +48,8 @@
   ],
   "main": "./lib/printer",
   "dependencies": {
-    "nan": "^2.14.2",
-    "node-gyp": "^8.1.0",
+    "nan": "^2.16.0",
+    "node-gyp": "^9.0.0",
     "node-pre-gyp": "^0.14.0"
   }
 }
