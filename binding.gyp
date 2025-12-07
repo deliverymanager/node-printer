@@ -13,6 +13,16 @@
           "files": [ "<(PRODUCT_DIR)/<(module_name).node" ],
           "destination": "<(module_path)"
         }
+      ],
+      # Ensure MSVC uses a modern C++ standard on Windows
+      'conditions': [
+        ['OS=="win"', {
+          'msvs_settings': {
+            'VCCLCompilerTool': {
+              'AdditionalOptions': ['/std:c++20', '/Zc:__cplusplus', '/Zm2000']
+            }
+          }
+        }]
       ]
     },
     {
@@ -28,7 +38,15 @@
       'cflags_cc+': [
         "-Wno-deprecated-declarations"
       ],
+      # Modern C++ standard and MSVC options for Windows builds
       'conditions': [
+        ['OS=="win"', {
+          'msvs_settings': {
+            'VCCLCompilerTool': {
+              'AdditionalOptions': ['/std:c++20', '/Zc:__cplusplus', '/Zm2000']
+            }
+          }
+        }],
         # common exclusions
         ['OS!="linux"', {'sources/': [['exclude', '_linux\\.cc$']]}],
         ['OS!="mac"', {'sources/': [['exclude', '_mac\\.cc|mm?$']]}],

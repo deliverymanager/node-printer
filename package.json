@@ -19,8 +19,6 @@
     "grunt": "^1.5.3",
     "grunt-contrib-copy": "^1.0.0",
     "grunt-contrib-jshint": "^3.2.0",
-    "grunt-node-gyp": "git://github.com/tojocky/grunt-node-gyp.git",
-    "grunt-nw-gyp": "git://github.com/tojocky/grunt-nw-gyp.git",
     "nodeunit": "*"
   },
   "engines": {
@@ -28,9 +26,10 @@
   },
   "scripts": {
     "manually_build_node16": "echo 'open powershell in admin mode and press nvm use 16.15.1 && npm rebuild -g'",
-    "update_modules": "ncu -u && npm i --leagcy-peer-deps",
+    "update_modules": "ncu -u && npm i --legacy-peer-deps",
     "preinstall": "node-gyp configure",
     "install": "node-gyp build",
+    "build-node-lts": "node-gyp configure build",
     "npg": "node-gyp build",
     "npg-clean": "node-pre-gyp clean",
     "npg-build": "node-pre-gyp build",

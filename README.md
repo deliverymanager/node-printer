@@ -74,6 +74,29 @@ npm install -g node-gyp
 npm install printer --msvs_version=2013  --build-from-source=node_printer
 ```
 
+#### Building from source with Node LTS (Node 24)
+
+On modern Node.js LTS (e.g. Node 24) you can build the native module locally from this repository.
+
+Windows users will need:
+
+- Node.js LTS (e.g. installed via `nvm`)
+- Python 3.x available on `PATH`
+- Visual Studio with the "Desktop development with C++" workload (or Build Tools)
+
+Example workflow from a clone of this repo:
+
+```bash
+nvm install 24.11.1
+nvm use 24.11.1
+
+# install dependencies
+npm install
+
+# build the native addon for the current Node version
+npm run build-node-lts
+```
+
 or [direct from git](https://www.npmjs.org/doc/cli/npm-install.html):
 
     npm install git+https://github.com/tojocky/node-printer.git
