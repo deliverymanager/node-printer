@@ -82,7 +82,7 @@ Windows users will need:
 
 - Node.js LTS (e.g. installed via `nvm`)
 - Python 3.x available on `PATH`
-- Visual Studio with the "Desktop development with C++" workload (or Build Tools)
+- Visual Studio with the "Desktop development with C++" workload (or Build Tools). Tested with Visual Studio Community 2026 (Dev18, toolset v143).
 
 Example workflow from a clone of this repo:
 
