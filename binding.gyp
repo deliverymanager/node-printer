@@ -1,7 +1,8 @@
 {
   "variables": {
     "module_name%": "node_printer",
-    "module_path%": "lib"
+    "module_path%": "lib",
+    "dmkiosk_release_build%": "0"
   },
   'targets': [
     {
@@ -17,6 +18,7 @@
       # Ensure MSVC uses a modern C++ standard on Windows
       'conditions': [
         ['OS=="win"', {
+          'msvs_toolset': 'v143',
           'msvs_settings': {
             'VCCLCompilerTool': {
               'AdditionalOptions': ['/std:c++20', '/Zc:__cplusplus', '/Zm2000']
@@ -41,11 +43,20 @@
       # Modern C++ standard and MSVC options for Windows builds
       'conditions': [
         ['OS=="win"', {
+          'msvs_toolset': 'v143',
           'msvs_settings': {
             'VCCLCompilerTool': {
               'AdditionalOptions': ['/std:c++20', '/Zc:__cplusplus', '/Zm2000']
             }
           }
+        }],
+        ['OS=="win" and dmkiosk_release_build=="1"', {
+          'defines': [
+            'DMKIOSK_NODE_PRINTER_RELEASE_BUILD=1'
+          ],
+          'include_dirs': [
+            '<(module_root_dir)/build/release/generated'
+          ]
         }],
         # common exclusions
         ['OS!="linux"', {'sources/': [['exclude', '_linux\\.cc$']]}],
