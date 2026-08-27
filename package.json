@@ -13,13 +13,13 @@
   ],
   "repository": {
     "type": "git",
-    "url": "https://github.com/tojocky/node-printer.git"
+    "url": "https://github.com/deliverymanager/node-printer.git"
   },
   "devDependencies": {
-    "grunt": "^1.5.3",
-    "grunt-contrib-copy": "^1.0.0",
-    "grunt-contrib-jshint": "^3.2.0",
-    "nodeunit": "*"
+    "grunt": "1.6.1",
+    "grunt-contrib-copy": "1.0.0",
+    "grunt-contrib-jshint": "3.2.0",
+    "nodeunit": "0.11.3"
   },
   "engines": {
     "node": ">= 0.8.0"
@@ -33,7 +33,11 @@
     "npg": "node-gyp build",
     "npg-clean": "node-pre-gyp clean",
     "npg-build": "node-pre-gyp build",
-    "test": "nodeunit test"
+    "release:build": "node scripts/release-launcher.js build",
+    "release:setup": "node scripts/release-launcher.js setup",
+    "release:verify": "node scripts/release-launcher.js verify",
+    "test": "node scripts/test-release-provenance.js",
+    "test:legacy": "nodeunit test"
   },
   "binary": {
     "module_name": "node_printer",
@@ -48,8 +52,9 @@
   ],
   "main": "./lib/printer",
   "dependencies": {
-    "nan": "^2.16.0",
-    "node-gyp": "^9.0.0",
-    "node-pre-gyp": "^0.14.0"
+    "nan": "2.24.0",
+    "node-gyp": "9.4.1",
+    "node-pre-gyp": "0.14.0",
+    "tar": "6.2.1"
   }
 }
