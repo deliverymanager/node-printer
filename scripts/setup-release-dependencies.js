@@ -39,22 +39,22 @@ function setupReleaseDependencies() {
     fs.writeFileSync(userConfig, '', { flag: 'wx' });
     fs.writeFileSync(globalConfig, '', { flag: 'wx' });
     result = spawnSync(process.execPath, [
-    npmCli,
-    'install',
-    '--ignore-scripts',
-    '--legacy-peer-deps',
-    '--no-audit',
-    '--no-fund',
-    `--userconfig=${userConfig}`,
-    `--globalconfig=${globalConfig}`,
-    '--registry=https://registry.npmjs.org/',
-    '--strict-ssl=true',
-  ], {
-    cwd: repoRoot,
-    env: createReleaseChildEnvironment(),
-    shell: false,
-    stdio: 'inherit',
-    windowsHide: true,
+      npmCli,
+      'install',
+      '--ignore-scripts',
+      '--legacy-peer-deps',
+      '--no-audit',
+      '--no-fund',
+      `--userconfig=${userConfig}`,
+      `--globalconfig=${globalConfig}`,
+      '--registry=https://registry.npmjs.org/',
+      '--strict-ssl=true',
+    ], {
+      cwd: repoRoot,
+      env: createReleaseChildEnvironment(),
+      shell: false,
+      stdio: 'inherit',
+      windowsHide: true,
     });
   } finally {
     for (const config of [userConfig, globalConfig]) {

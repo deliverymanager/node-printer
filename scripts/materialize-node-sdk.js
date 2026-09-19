@@ -308,7 +308,7 @@ async function materializePinnedNodeSdk(repoRoot) {
   if (readRegularNonLinkFile(nodeLibPath).sha256 !== REQUIRED_NODE_IMPORT_LIBRARY_SHA256) {
     throw new Error('Materialized x64 node.lib changed after validation');
   }
-  for (const required of ['common.gypi', 'include/node/node.h', 'include/node/node_version.h']) {
+  for (const required of ['include/node/common.gypi', 'include/node/node.h', 'include/node/node_version.h']) {
     readRegularNonLinkFile(path.join(sdkRoot, ...required.split('/')));
   }
   const closingSdkValidation = validateReleaseSdkInputs(repoRoot);
