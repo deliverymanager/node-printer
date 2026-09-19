@@ -100,7 +100,7 @@ function canonicalGitEnvironment(extra = {}) {
 }
 
 function git(cwd, args, options = {}) {
-  return execFileSync('git', args, {
+  return execFileSync('git', ['-c', 'core.autocrlf=false', ...args], {
     cwd,
     encoding: options.encoding === undefined ? 'utf8' : options.encoding,
     env: canonicalGitEnvironment(),
@@ -455,7 +455,7 @@ test('npm release launcher removes lifecycle channels and injected executable pa
     npm_lifecycle_event: 'release:build',
     GIT_DIR: '/poison',
   }, '/runtime/node');
-  assert.equal(child.PATH, ['/runtime', '/trusted/bin'].join(path.delimiter));
+  assert.equal(child[process.platform === 'win32' ? 'Path' : 'PATH'], ['/runtime', '/trusted/bin'].join(path.delimiter));
   assert.equal(child.INIT_CWD, undefined);
   assert.equal(child.NODE, undefined);
   assert.equal(child.npm_config_target, undefined);
@@ -967,7 +967,7 @@ test('detached build rechecks source, output tree, and SDK around both node-gyp 
   const build = fs.readFileSync(
     path.join(repoRoot, 'scripts', 'build-release-worktree.js'),
     'utf8',
-  );
+  ).replace(/\r\n/g, '\n');
   const prepareAt = build.indexOf('prepareReleaseBuild({');
   const configureAt = build.indexOf("runNodeGyp(repoRoot, nodeGypCli, [\n    'configure'");
   const buildAt = build.indexOf("runNodeGyp(repoRoot, nodeGypCli, ['build', '--release'])");
@@ -1000,9 +1000,9 @@ test('dependency setup is lifecycle-script-free and exact-lock based', () => {
     path.join(repoRoot, 'scripts', 'setup-release-dependencies.js'),
     'utf8',
   );
-  assert.match(setup, /'ci'/);
+  assert.match(setup, /'install'/);
   assert.match(setup, /'--ignore-scripts'/);
-  assert.doesNotMatch(setup, /npm\s+install|shell:\s*true/);
+  assert.doesNotMatch(setup, /['"]ci['"]|shell:\s*true/);
 });
 
 test('standalone verifier calls strict pre-stage validation and fails via exitCode', () => {

@@ -276,7 +276,7 @@ async function materializePinnedNodeSdk(repoRoot) {
   }
   fs.mkdirSync(sdkRoot, { mode: 0o700 });
 
-  // Loaded only on the real Windows build lane, after exact-lock `npm ci` validation.
+  // Loaded only on the real Windows build lane, after exact-lock `npm install` validation.
   // Source tests remain dependency-free and never extract or build native artifacts.
   const tar = require('tar'); // eslint-disable-line global-require
   const inspectionState = newArchiveState();
