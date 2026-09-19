@@ -37,6 +37,7 @@
     "release:setup": "node scripts/release-launcher.js setup",
     "release:verify": "node scripts/release-launcher.js verify",
     "test": "node scripts/test-release-provenance.js",
+    "test:gyp-release-condition": "python scripts/test-gyp-release-condition.py",
     "test:legacy": "nodeunit test"
   },
   "binary": {
