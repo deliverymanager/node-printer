@@ -1,6 +1,8 @@
 'use strict';
 
 const { spawnSync } = require('node:child_process');
+const fs = require('node:fs');
+const os = require('node:os');
 const path = require('node:path');
 
 const {
@@ -26,16 +28,25 @@ function setupReleaseDependencies() {
   if (npmPackage.name !== 'npm' || npmPackage.version !== REQUIRED_NPM_VERSION) {
     throw new Error(`Pinned Node distribution must provide npm ${REQUIRED_NPM_VERSION}`);
   }
-  const nullConfig = process.platform === 'win32' ? 'NUL' : '/dev/null';
-  const result = spawnSync(process.execPath, [
+  // npm rejects loading the same path for both config layers, including NUL.
+  // Use distinct empty files so neither layer can inherit machine credentials
+  // or toolchain overrides. Remove only these exact files after npm exits.
+  const configRoot = fs.mkdtempSync(path.join(os.tmpdir(), 'node-printer-npm-config-'));
+  const userConfig = path.join(configRoot, 'user.npmrc');
+  const globalConfig = path.join(configRoot, 'global.npmrc');
+  let result;
+  try {
+    fs.writeFileSync(userConfig, '', { flag: 'wx' });
+    fs.writeFileSync(globalConfig, '', { flag: 'wx' });
+    result = spawnSync(process.execPath, [
     npmCli,
     'install',
     '--ignore-scripts',
     '--legacy-peer-deps',
     '--no-audit',
     '--no-fund',
-    `--userconfig=${nullConfig}`,
-    `--globalconfig=${nullConfig}`,
+    `--userconfig=${userConfig}`,
+    `--globalconfig=${globalConfig}`,
     '--registry=https://registry.npmjs.org/',
     '--strict-ssl=true',
   ], {
@@ -44,7 +55,13 @@ function setupReleaseDependencies() {
     shell: false,
     stdio: 'inherit',
     windowsHide: true,
-  });
+    });
+  } finally {
+    for (const config of [userConfig, globalConfig]) {
+      if (fs.existsSync(config)) fs.unlinkSync(config);
+    }
+    fs.rmdirSync(configRoot);
+  }
   if (result.error) throw result.error;
   if (result.status !== 0) throw new Error(`npm install exited with status ${result.status}`);
   if (assertReleaseDependencyContract(repoRoot) !== lockHash) {
