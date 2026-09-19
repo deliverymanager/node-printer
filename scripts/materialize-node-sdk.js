@@ -301,9 +301,11 @@ async function materializePinnedNodeSdk(repoRoot) {
     throw new Error('Node headers archive inspection/extraction entry sets disagree');
   }
 
-  const x64Directory = path.join(sdkRoot, 'x64');
-  if (!fs.existsSync(x64Directory)) fs.mkdirSync(x64Directory, { mode: 0o700 });
-  const nodeLibPath = path.join(x64Directory, 'node.lib');
+  // With --nodedir, node-gyp uses $(Configuration)/node.lib rather than its
+  // download-cache x64/node.lib layout. This producer always builds Release.
+  const libraryDirectory = path.join(sdkRoot, 'Release');
+  if (!fs.existsSync(libraryDirectory)) fs.mkdirSync(libraryDirectory, { mode: 0o700 });
+  const nodeLibPath = path.join(libraryDirectory, 'node.lib');
   fs.writeFileSync(nodeLibPath, importLibraryContents, { flag: 'wx', mode: 0o600 });
   if (readRegularNonLinkFile(nodeLibPath).sha256 !== REQUIRED_NODE_IMPORT_LIBRARY_SHA256) {
     throw new Error('Materialized x64 node.lib changed after validation');
