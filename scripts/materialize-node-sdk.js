@@ -276,7 +276,7 @@ async function materializePinnedNodeSdk(repoRoot) {
   }
   fs.mkdirSync(sdkRoot, { mode: 0o700 });
 
-  // Loaded only on the real Windows build lane, after exact-lock `npm ci` validation.
+  // Loaded only on the real Windows build lane, after exact-lock dependency validation.
   // Source tests remain dependency-free and never extract or build native artifacts.
   const tar = require('tar'); // eslint-disable-line global-require
   const inspectionState = newArchiveState();
@@ -308,9 +308,7 @@ async function materializePinnedNodeSdk(repoRoot) {
   if (readRegularNonLinkFile(nodeLibPath).sha256 !== REQUIRED_NODE_IMPORT_LIBRARY_SHA256) {
     throw new Error('Materialized x64 node.lib changed after validation');
   }
-  for (const required of ['common.gypi', 'include/node/node.h', 'include/node/node_version.h']) {
-    readRegularNonLinkFile(path.join(sdkRoot, ...required.split('/')));
-  }
+  validateMaterializedHeaderLayout(sdkRoot);
   const closingSdkValidation = validateReleaseSdkInputs(repoRoot);
   if (!closingSdkValidation.headers.contents.equals(headersContents)
       || !closingSdkValidation.importLibrary.contents.equals(importLibraryContents)) {
@@ -318,6 +316,13 @@ async function materializePinnedNodeSdk(repoRoot) {
   }
   const treeSha256 = inspectOutputTree(sdkRoot);
   return { sdkRoot, treeSha256 };
+}
+
+function validateMaterializedHeaderLayout(sdkRoot) {
+  // Official headers archives place common.gypi beside node.h, as node-gyp expects.
+  for (const required of ['common.gypi', 'node.h', 'node_version.h']) {
+    readRegularNonLinkFile(path.join(sdkRoot, 'include', 'node', required));
+  }
 }
 
 function verifyMaterializedNodeSdk(sdkRoot, expectedTreeSha256) {
@@ -339,5 +344,6 @@ module.exports = {
   validateArchiveEntry,
   validateDownloadedBytes,
   validateDownloadResponse,
+  validateMaterializedHeaderLayout,
   verifyMaterializedNodeSdk,
 };
