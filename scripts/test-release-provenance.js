@@ -1000,7 +1000,7 @@ test('dependency setup is lifecycle-script-free and exact-lock based', () => {
     path.join(repoRoot, 'scripts', 'setup-release-dependencies.js'),
     'utf8',
   );
-  assert.match(setup, /'ci'/);
+  assert.match(setup, /'install',/);
   assert.match(setup, /'--ignore-scripts'/);
   assert.doesNotMatch(setup, /npm\s+install|shell:\s*true/);
 });
