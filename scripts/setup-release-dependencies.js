@@ -29,7 +29,7 @@ function setupReleaseDependencies() {
   const nullConfig = process.platform === 'win32' ? 'NUL' : '/dev/null';
   const result = spawnSync(process.execPath, [
     npmCli,
-    'ci',
+    'install',
     '--ignore-scripts',
     '--legacy-peer-deps',
     '--no-audit',
@@ -46,9 +46,9 @@ function setupReleaseDependencies() {
     windowsHide: true,
   });
   if (result.error) throw result.error;
-  if (result.status !== 0) throw new Error(`npm ci exited with status ${result.status}`);
+  if (result.status !== 0) throw new Error(`npm install exited with status ${result.status}`);
   if (assertReleaseDependencyContract(repoRoot) !== lockHash) {
-    throw new Error('npm ci changed the canonical package lock');
+    throw new Error('npm install changed the canonical package lock');
   }
   assertInstalledReleaseDependencies(repoRoot);
   captureReleaseSource(repoRoot, { phase: 'prepare' });
