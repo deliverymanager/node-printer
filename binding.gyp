@@ -2,7 +2,7 @@
   "variables": {
     "module_name%": "node_printer",
     "module_path%": "lib",
-    "dmkiosk_release_build%": "0"
+    "dmkiosk_release_build%": 0
   },
   'targets': [
     {
@@ -50,7 +50,7 @@
             }
           }
         }],
-        ['OS=="win" and dmkiosk_release_build=="1"', {
+        ['OS=="win" and dmkiosk_release_build==1', {
           'defines': [
             'DMKIOSK_NODE_PRINTER_RELEASE_BUILD=1'
           ],
