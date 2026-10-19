@@ -1002,7 +1002,7 @@ test('dependency setup is lifecycle-script-free and exact-lock based', () => {
   );
   assert.match(setup, /'install',/);
   assert.match(setup, /'--ignore-scripts'/);
-  assert.doesNotMatch(setup, /npm\s+install|shell:\s*true/);
+  assert.doesNotMatch(setup, /spawnSync\(\s*['"]npm(?:\.cmd)?['"]|shell:\s*true/);
 });
 
 test('standalone verifier calls strict pre-stage validation and fails via exitCode', () => {
