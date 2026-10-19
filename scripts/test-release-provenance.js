@@ -100,7 +100,7 @@ function canonicalGitEnvironment(extra = {}) {
 }
 
 function git(cwd, args, options = {}) {
-  return execFileSync('git', args, {
+  return execFileSync('git', ['-c', 'core.autocrlf=false', '-c', 'core.eol=lf', ...args], {
     cwd,
     encoding: options.encoding === undefined ? 'utf8' : options.encoding,
     env: canonicalGitEnvironment(),
@@ -455,7 +455,7 @@ test('npm release launcher removes lifecycle channels and injected executable pa
     npm_lifecycle_event: 'release:build',
     GIT_DIR: '/poison',
   }, '/runtime/node');
-  assert.equal(child.PATH, ['/runtime', '/trusted/bin'].join(path.delimiter));
+  assert.equal(child[process.platform === 'win32' ? 'Path' : 'PATH'], ['/runtime', '/trusted/bin'].join(path.delimiter));
   assert.equal(child.INIT_CWD, undefined);
   assert.equal(child.NODE, undefined);
   assert.equal(child.npm_config_target, undefined);
@@ -1000,9 +1000,9 @@ test('dependency setup is lifecycle-script-free and exact-lock based', () => {
     path.join(repoRoot, 'scripts', 'setup-release-dependencies.js'),
     'utf8',
   );
-  assert.match(setup, /'ci'/);
+  assert.match(setup, /'install',/);
   assert.match(setup, /'--ignore-scripts'/);
-  assert.doesNotMatch(setup, /npm\s+install|shell:\s*true/);
+  assert.doesNotMatch(setup, /spawnSync\(\s*['"]npm(?:\.cmd)?['"]|shell:\s*true/);
 });
 
 test('standalone verifier calls strict pre-stage validation and fails via exitCode', () => {

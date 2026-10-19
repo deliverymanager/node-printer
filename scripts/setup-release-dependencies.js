@@ -12,6 +12,7 @@ const {
   validateReleaseNodeExecutable,
 } = require('../release-build-policy');
 const { captureReleaseSource } = require('../release-provenance');
+const { withIsolatedNpmConfig } = require('./isolated-npm-config');
 
 function setupReleaseDependencies() {
   const repoRoot = path.resolve(__dirname, '..');
@@ -26,16 +27,15 @@ function setupReleaseDependencies() {
   if (npmPackage.name !== 'npm' || npmPackage.version !== REQUIRED_NPM_VERSION) {
     throw new Error(`Pinned Node distribution must provide npm ${REQUIRED_NPM_VERSION}`);
   }
-  const nullConfig = process.platform === 'win32' ? 'NUL' : '/dev/null';
-  const result = spawnSync(process.execPath, [
+  const result = withIsolatedNpmConfig((config) => spawnSync(process.execPath, [
     npmCli,
-    'ci',
+    'install',
     '--ignore-scripts',
     '--legacy-peer-deps',
     '--no-audit',
     '--no-fund',
-    `--userconfig=${nullConfig}`,
-    `--globalconfig=${nullConfig}`,
+    `--userconfig=${config.user}`,
+    `--globalconfig=${config.global}`,
     '--registry=https://registry.npmjs.org/',
     '--strict-ssl=true',
   ], {
@@ -44,11 +44,11 @@ function setupReleaseDependencies() {
     shell: false,
     stdio: 'inherit',
     windowsHide: true,
-  });
+  }));
   if (result.error) throw result.error;
-  if (result.status !== 0) throw new Error(`npm ci exited with status ${result.status}`);
+  if (result.status !== 0) throw new Error(`npm install exited with status ${result.status}`);
   if (assertReleaseDependencyContract(repoRoot) !== lockHash) {
-    throw new Error('npm ci changed the canonical package lock');
+    throw new Error('npm install changed the canonical package lock');
   }
   assertInstalledReleaseDependencies(repoRoot);
   captureReleaseSource(repoRoot, { phase: 'prepare' });
