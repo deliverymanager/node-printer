@@ -14,8 +14,25 @@
 #include <utility>
 #include <sstream>
 #include <node_version.h>
+#include "print_job_win.hpp"
 
 namespace{
+    v8::Local<v8::Value> createPrintJobError(const PrintJobResult& result)
+    {
+        v8::Local<v8::Object> error = Nan::Error(printJobErrorMessage(result).c_str()).As<v8::Object>();
+        Nan::Set(error, Nan::New("code").ToLocalChecked(), Nan::New(result.code).ToLocalChecked());
+        Nan::Set(error, Nan::New("stage").ToLocalChecked(), Nan::New(result.stage).ToLocalChecked());
+        Nan::Set(error, Nan::New("win32Code").ToLocalChecked(), Nan::New<v8::Number>(result.win32Code));
+        Nan::Set(error, Nan::New("jobId").ToLocalChecked(), Nan::New<v8::Number>(result.jobId));
+        Nan::Set(error, Nan::New("bytesRequested").ToLocalChecked(), Nan::New<v8::Number>(static_cast<double>(result.bytesRequested)));
+        Nan::Set(error, Nan::New("bytesWritten").ToLocalChecked(), Nan::New<v8::Number>(result.bytesWritten));
+        Nan::Set(error, Nan::New("deliveryUncertain").ToLocalChecked(), Nan::New(result.deliveryUncertain));
+        Nan::Set(error, Nan::New("abortAttempted").ToLocalChecked(), Nan::New(result.abortAttempted));
+        Nan::Set(error, Nan::New("abortSucceeded").ToLocalChecked(), Nan::New(result.abortSucceeded));
+        Nan::Set(error, Nan::New("abortWin32Code").ToLocalChecked(), Nan::New<v8::Number>(result.abortWin32Code));
+        return error;
+    }
+
     typedef std::map<std::string, DWORD> StatusMapType;
 
     /** Memory value class management to avoid memory leak
@@ -693,18 +710,17 @@ MY_NODE_MODULE_CALLBACK(PrintDirect)
     REQUIRE_ARGUMENT_STRINGW(iArgs, 2, docname);
     REQUIRE_ARGUMENT_STRINGW(iArgs, 3, type);
 
-    BOOL     bStatus = true;
     // Open a handle to the printer.
     PrinterHandle printerHandle((LPWSTR)(*printername));
     DOC_INFO_1W DocInfo;
-    DWORD      dwJob = 0L;
-    DWORD      dwBytesWritten = 0L;
 
     if (!printerHandle)
     {
-        std::string error_str("error on PrinterHandle: ");
-        error_str += getLastErrorCodeAndMessage();
-        RETURN_EXCEPTION_STR(error_str.c_str());
+        const DWORD errorCode = GetLastError();
+        const PrintJobResult result = failPrintJob(PrintJobResult(data.size()),
+            NULL, "OpenPrinterW", errorCode);
+        Nan::ThrowError(createPrintJobError(result));
+        return;
     }
 
     // Fill in the structure with info about this "document."
@@ -712,33 +728,13 @@ MY_NODE_MODULE_CALLBACK(PrintDirect)
     DocInfo.pOutputFile =  NULL;
     DocInfo.pDatatype = (LPWSTR)(*type);
 
-    // Inform the spooler the document is beginning.
-    dwJob = StartDocPrinterW(*printerHandle, 1, (LPBYTE)&DocInfo );
-    if (dwJob > 0) {
-        // Start a page.
-        bStatus = StartPagePrinter(*printerHandle);
-        if (bStatus) {
-            // Send the data to the printer.
-            //TODO: check with sizeof(LPTSTR) is the same as sizeof(char)
-            bStatus = WritePrinter( *printerHandle, (LPVOID)(data.c_str()), (DWORD)data.size(), &dwBytesWritten);
-            EndPagePrinter(*printerHandle);
-        }else{
-            std::string error_str("StartPagePrinter error: ");
-    	    error_str += getLastErrorCodeAndMessage();
-            RETURN_EXCEPTION_STR(error_str.c_str());
-        }
-        // Inform the spooler that the document is ending.
-        EndDocPrinter(*printerHandle);
-    }else{
-    	std::string error_str("StartDocPrinterW error: ");
-    	error_str += getLastErrorCodeAndMessage();
-        RETURN_EXCEPTION_STR(error_str.c_str());
+    const PrintJobResult result = submitPrintJob(*printerHandle, DocInfo, data.c_str(), data.size());
+    if (!result.success())
+    {
+        Nan::ThrowError(createPrintJobError(result));
+        return;
     }
-    // Check to see if correct number of bytes were written.
-    if (dwBytesWritten != data.size()) {
-        RETURN_EXCEPTION_STR("not sent all bytes");
-    }
-    MY_NODE_MODULE_RETURN_VALUE(V8_VALUE_NEW(Number, dwJob));
+    MY_NODE_MODULE_RETURN_VALUE(V8_VALUE_NEW(Number, result.jobId));
 }
 
 MY_NODE_MODULE_CALLBACK(PrintFile)
