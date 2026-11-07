@@ -69,7 +69,7 @@ int main()
         result = run(stages[i]);
         assert(!result.success() && std::string(result.stage) == stages[i]);
         assert(result.win32Code == 123);
-        assert(result.jobId == (i == 0 ? 0 : 42));
+        assert(result.jobId == (i == 0 ? 0u : 42u));
         assert(result.abortAttempted == (i != 0));
         assert(result.deliveryUncertain == (i >= 2));
         assert(calls.size() == i + 1 + (i == 0 ? 0 : 1));
