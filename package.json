@@ -36,7 +36,8 @@
     "release:build": "node scripts/release-launcher.js build",
     "release:setup": "node scripts/release-launcher.js setup",
     "release:verify": "node scripts/release-launcher.js verify",
-    "test": "node scripts/test-release-provenance.js && node --test scripts/test-isolated-npm-config.js scripts/test-node-sdk-layout.js && python scripts/test-release-switch.py",
+    "test": "node scripts/test-print-job-win.js && node scripts/test-release-provenance.js && node --test scripts/test-isolated-npm-config.js scripts/test-node-sdk-layout.js && python scripts/test-release-switch.py",
+    "test:print-job-win": "node scripts/test-print-job-win.js",
     "test:legacy": "nodeunit test"
   },
   "binary": {

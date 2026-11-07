@@ -49,6 +49,31 @@ I was involved in a project where I need to print from Node.JS. This is the reas
 * `setJob(printerName, jobId, command)` to send a command to a job (e.g. `'CANCEL'` to cancel the job);
 * `getSupportedJobCommands()` to get supported job commands for setJob() depends on OS. `'CANCEL'` command is supported from all OS-es.
 
+### Windows submission errors
+
+`printDirect` keeps its numeric job-ID success result. Success means that
+`StartDocPrinterW`, `StartPagePrinter`, `WritePrinter` (including the full byte
+count), `EndPagePrinter` and `EndDocPrinter` succeeded. It does not confirm paper
+output or later USB/device delivery.
+
+A failed submission throws an `Error` with `code`, `stage`, `win32Code`, `jobId`,
+`bytesRequested`, `bytesWritten`, and `deliveryUncertain`. The original Windows
+error is captured before cleanup. A short write has code `ERR_PRINT_SHORT_WRITE`
+and `win32Code: 0`, because a successful API call does not supply a fresh Windows
+error. Oversized input is rejected before starting a spool job.
+
+After a job starts, a failed submission attempts `AbortPrinter` on that job's
+handle. `abortAttempted`, `abortSucceeded` and `abortWin32Code` describe cleanup
+separately; cleanup failure never replaces the original error. The handle is
+still closed. No automatic replay is added: after entering `WritePrinter`, some
+bytes may have reached the device even when abort succeeds.
+
+`npm run test:print-job-win` compiles and runs the production submission helper
+against fake Win32 calls, covering each failure stage, short writes and cleanup.
+It needs a C++ compiler (`CXX`, or `cl.exe` on Windows / `c++` elsewhere), and
+does not access a printer. Windows addon build and hardware validation remain
+separate from this portable test.
+
 
 ### How to install:
 Make sure you have Python 2.x installed on your system. Windows users will also require Visual Studio (2013 Express is a good fit)
